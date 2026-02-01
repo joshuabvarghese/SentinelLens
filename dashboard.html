@@ -1,0 +1,25 @@
+async function loadData() {
+    try {
+        const response = await fetch('monitoring_results.json');
+        const data = await response.json();
+        
+        // Update the "Last Updated" timestamp
+        document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleString();
+        
+        // Render the cards for CPU, Memory, and Disk
+        const container = document.getElementById('checks-container');
+        container.innerHTML = data.checks.map(check => `
+            <div class="card ${check.status}">
+                <h3>${check.name.toUpperCase()}</h3>
+                <p>${check.message}</p>
+                <span class="badge">${check.status}</span>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading monitoring data:', error);
+    }
+}
+
+// Auto-refresh logic
+setInterval(loadData, 30000); 
+loadData();
