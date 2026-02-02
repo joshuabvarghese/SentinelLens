@@ -1,25 +1,46 @@
-async function loadData() {
-    try {
-        const response = await fetch('monitoring_results.json');
-        const data = await response.json();
-        
-        // Update the "Last Updated" timestamp
-        document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleString();
-        
-        // Render the cards for CPU, Memory, and Disk
-        const container = document.getElementById('checks-container');
-        container.innerHTML = data.checks.map(check => `
-            <div class="card ${check.status}">
-                <h3>${check.name.toUpperCase()}</h3>
-                <p>${check.message}</p>
-                <span class="badge">${check.status}</span>
-            </div>
-        `).join('');
-    } catch (error) {
-        console.error('Error loading monitoring data:', error);
-    }
-}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>System Monitor</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .card { padding: 20px; border-radius: 8px; background: #1e293b; border-left: 5px solid gray; }
+        .healthy { border-left-color: #22c55e; }    /* Green */
+        .unhealthy { border-left-color: #ef4444; }  /* Red */
+        .badge { font-weight: bold; text-transform: uppercase; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <h1>System Health <small id="time" style="font-size: 1rem; color: #94a3b8;"></small></h1>
+    <div id="container" class="grid">Loading metrics...</div>
 
-// Auto-refresh logic
-setInterval(loadData, 30000); 
-loadData();
+    <script>
+        async function updateDashboard() {
+            try {
+                const res = await fetch('monitoring_results.json');
+                const data = await res.json();
+                
+                document.getElementById('time').innerText = `Last update: ${new Date().toLocaleTimeString()}`;
+                
+                const html = data.checks.map(check => `
+                    <div class="card ${check.status}">
+                        <h3>${check.name}</h3>
+                        <p>${check.message}</p>
+                        <span class="badge">${check.status}</span>
+                    </div>
+                `).join('');
+                
+                document.getElementById('container').innerHTML = html;
+            } catch (e) {
+                console.log("Waiting for data file...");
+            }
+        }
+
+        // Refresh every 5 seconds
+        setInterval(updateDashboard, 5000);
+        updateDashboard();
+    </script>
+</body>
+</html>
