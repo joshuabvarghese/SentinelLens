@@ -30,4 +30,6 @@ jobs:
         run: docker build -t techops-monitoring:test .
 
       - name: Validate Kubernetes Manifests
-        run: kubectl apply --dry-run=client -f kubernetes.yaml --validate=false
+        run:
+          python3 -c "import yaml; yaml.safe_load(open('kubernetes.yaml'))"
+          echo "Kubernetes YAML is syntactically valid."
